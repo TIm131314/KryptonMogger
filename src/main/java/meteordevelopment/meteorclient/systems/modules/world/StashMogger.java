@@ -14,6 +14,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
@@ -73,24 +74,26 @@ public class StashMogger extends Module {
 
         if (mc.level == null) return;
 
-        for (LevelChunk chunk : Utils.chunks(false)) {
-            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
-                BlockPos pos = blockEntity.getBlockPos();
-                boolean isValidType = false;
+        for (ChunkAccess chunkAccess : Utils.chunks(false)) {
+            if (chunkAccess instanceof LevelChunk chunk) {
+                for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                    BlockPos pos = blockEntity.getBlockPos();
+                    boolean isValidType = false;
 
-                if (scanChests.get() && blockEntity instanceof ChestBlockEntity) isValidType = true;
-                
-                if (scanBarrels.get() && blockEntity instanceof BarrelBlockEntity) isValidType = true;
-                
-                if (scanShulkers.get() && blockEntity instanceof ShulkerBoxBlockEntity) isValidType = true;
+                    if (scanChests.get() && blockEntity instanceof ChestBlockEntity) isValidType = true;
+                    
+                    if (scanBarrels.get() && blockEntity instanceof BarrelBlockEntity) isValidType = true;
+                    
+                    if (scanShulkers.get() && blockEntity instanceof ShulkerBoxBlockEntity) isValidType = true;
 
-                if (scanCopperChests.get()) {
-                    String blockName = BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()).getPath();
-                    if (blockName.contains("copper_chest")) isValidType = true;
-                }
+                    if (scanCopperChests.get()) {
+                        String blockName = BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()).getPath();
+                        if (blockName.contains("copper_chest")) isValidType = true;
+                    }
 
-                if (isValidType && !isAdminFakeBase(pos) && hasAirAround(pos)) {
-                    tempRealBlocks.add(pos); 
+                    if (isValidType && !isAdminFakeBase(pos) && hasAirAround(pos)) {
+                        tempRealBlocks.add(pos); 
+                    }
                 }
             }
         }
