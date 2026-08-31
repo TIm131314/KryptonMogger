@@ -7,6 +7,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.world.ChunkUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -72,23 +73,25 @@ public class StashMogger extends Module {
 
         if (mc.level == null) return;
 
-        for (BlockEntity blockEntity : mc.level.blockEntityList) {
-            BlockPos pos = blockEntity.getBlockPos();
-            boolean isValidType = false;
+        for (LevelChunk chunk : ChunkUtils.chunks()) {
+            for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
+                BlockPos pos = blockEntity.getBlockPos();
+                boolean isValidType = false;
 
-            if (scanChests.get() && blockEntity instanceof ChestBlockEntity) isValidType = true;
-            
-            if (scanBarrels.get() && blockEntity instanceof BarrelBlockEntity) isValidType = true;
-            
-            if (scanShulkers.get() && blockEntity instanceof ShulkerBoxBlockEntity) isValidType = true;
+                if (scanChests.get() && blockEntity instanceof ChestBlockEntity) isValidType = true;
+                
+                if (scanBarrels.get() && blockEntity instanceof BarrelBlockEntity) isValidType = true;
+                
+                if (scanShulkers.get() && blockEntity instanceof ShulkerBoxBlockEntity) isValidType = true;
 
-            if (scanCopperChests.get()) {
-                String blockName = BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()).getPath();
-                if (blockName.contains("copper_chest")) isValidType = true;
-            }
+                if (scanCopperChests.get()) {
+                    String blockName = BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()).getPath();
+                    if (blockName.contains("copper_chest")) isValidType = true;
+                }
 
-            if (isValidType && !isAdminFakeBase(pos) && hasAirAround(pos)) {
-                tempRealBlocks.add(pos); 
+                if (isValidType && !isAdminFakeBase(pos) && hasAirAround(pos)) {
+                    tempRealBlocks.add(pos); 
+                }
             }
         }
 
