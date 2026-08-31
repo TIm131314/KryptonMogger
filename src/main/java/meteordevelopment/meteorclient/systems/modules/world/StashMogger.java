@@ -154,4 +154,3 @@ public class StashMogger extends Module {
  
 
  
-add(new StashMogger());
