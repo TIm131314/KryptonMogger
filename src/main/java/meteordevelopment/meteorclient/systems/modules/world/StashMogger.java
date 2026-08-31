@@ -8,12 +8,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +70,10 @@ public class StashMogger extends Module {
         verifiedBases.clear(); 
         List<BlockPos> tempRealBlocks = new ArrayList<>(); 
 
-        for (BlockEntity blockEntity : mc.world.blockEntities) {
-            BlockPos pos = blockEntity.getPos();
+        if (mc.level == null) return;
+
+        for (BlockEntity blockEntity : mc.level.blockEntityList) {
+            BlockPos pos = blockEntity.getBlockPos();
             boolean isValidType = false;
 
             if (scanChests.get() && blockEntity instanceof ChestBlockEntity) isValidType = true;
@@ -81,7 +83,7 @@ public class StashMogger extends Module {
             if (scanShulkers.get() && blockEntity instanceof ShulkerBoxBlockEntity) isValidType = true;
 
             if (scanCopperChests.get()) {
-                String blockName = Registries.BLOCK.getId(blockEntity.getCachedState().getBlock()).getPath();
+                String blockName = BuiltInRegistries.BLOCK.getKey(blockEntity.getBlockState().getBlock()).getPath();
                 if (blockName.contains("copper_chest")) isValidType = true;
             }
 
@@ -93,7 +95,7 @@ public class StashMogger extends Module {
         for (BlockPos blockPos : tempRealBlocks) {
             int closeBlocks = 0; 
             for (BlockPos otherPos : tempRealBlocks) {
-                if (blockPos.isWithinDistance(otherPos, 8)) {
+                if (blockPos.closerThan(otherPos, 8)) {
                     closeBlocks++;
                 }
             }
@@ -122,20 +124,20 @@ public class StashMogger extends Module {
     }
 
     private boolean hasAirAround(BlockPos pos) {
-        BlockPos[] offsets = { pos.up(), pos.down(), pos.north(), pos.south(), pos.east(), pos.west() };
+        BlockPos[] offsets = { pos.above(), pos.below(), pos.north(), pos.south(), pos.east(), pos.west() };
         for (BlockPos offset : offsets) {
-            if (mc.world.getBlockState(offset).isAir()) return true;
+            if (mc.level.getBlockState(offset).isAir()) return true;
         }
         return false; 
     }
 
     private boolean isAdminFakeBase(BlockPos pos) {
-        if (mc.world.getBlockState(pos).getBlock() == Blocks.TRAPPED_CHEST) return true;
+        if (mc.level.getBlockState(pos).getBlock() == Blocks.TRAPPED_CHEST) return true;
 
         for (int x = -3; x <= 3; x++) {
             for (int y = -3; y <= 3; y++) {
                 for (int z = -3; z <= 3; z++) {
-                    Block block = mc.world.getBlockState(pos.add(x, y, z)).getBlock();
+                    Block block = mc.level.getBlockState(pos.offset(x, y, z)).getBlock();
                     if (block == Blocks.TNT || block == Blocks.OBSERVER || block == Blocks.SCULK_SENSOR || block == Blocks.COMMAND_BLOCK) {
                         return true; 
                     }
@@ -143,7 +145,7 @@ public class StashMogger extends Module {
             }
         }
         
-        WorldChunk chunk = mc.world.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
+        LevelChunk chunk = mc.level.getChunkAt(pos);
         if (chunk != null && chunk.getInhabitedTime() < 36000) {
             return true; 
         }
@@ -151,6 +153,3 @@ public class StashMogger extends Module {
         return false; 
     }
 }
- 
-
- 
