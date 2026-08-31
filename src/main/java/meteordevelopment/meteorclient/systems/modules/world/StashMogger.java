@@ -7,7 +7,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import meteordevelopment.meteorclient.utils.world.ChunkUtils;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -73,7 +73,7 @@ public class StashMogger extends Module {
 
         if (mc.level == null) return;
 
-        for (LevelChunk chunk : ChunkUtils.chunks()) {
+        for (LevelChunk chunk : Utils.chunks(false)) {
             for (BlockEntity blockEntity : chunk.getBlockEntities().values()) {
                 BlockPos pos = blockEntity.getBlockPos();
                 boolean isValidType = false;
